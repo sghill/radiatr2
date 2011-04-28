@@ -13,17 +13,10 @@
   </head>
   <body>
     <script type="text/javascript">
-    window.location.querystring["query"]
-    $.ajax({
-      url: "http://build.zynx.com:8080/api/json",
-      context: document.body,
-      jsonp: true,
-      success: function(response){
-        displayJobs($.parseJSON(response));
-      },
-      failure: function(response) {
-        alert(response);
-      }
+    $(document).ready(function() {
+      $.getJSON('http://build.expenselynx.com:8080/api/json?jsonp=?', function(data) {
+        displayJobs(data);
+      });
     });
     
     function displayJobs(data) {
