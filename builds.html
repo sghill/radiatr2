@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+  <script type="text/javascript" src="http://cloud.github.com/downloads/wycats/handlebars.js/handlebars-0.9.0.pre.5.js"></script>
+  <script id="jobs-template" type="text/x-handlebars-template">
+    <ol class="jobs">
+      {{#each jobs}}
+      <li><a href="{{url}}api/json" class="{{color}}">{{name}}</a></li>
+      {{/each}}
+    </ol>
+  </script>
+  </head>
+  <body>
+    <script type="text/javascript">
+    window.location.querystring["query"]
+    $.ajax({
+      url: "http://build.zynx.com:8080/api/json",
+      context: document.body,
+      jsonp: true,
+      success: function(response){
+        displayJobs($.parseJSON(response));
+      },
+      failure: function(response) {
+        alert(response);
+      }
+    });
+    
+    function displayJobs(data) {
+      var source = $("#jobs-template").html();
+      var template = Handlebars.compile(source);
+      var html = template(data);
+      
+      $("div.builds").html(html);
+    }
+    </script>
+      <div class="builds"></div>
+  </body>
+</html>
