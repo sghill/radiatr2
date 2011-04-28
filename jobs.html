@@ -13,25 +13,22 @@
   </head>
   <body>
     <script type="text/javascript">
-    $(document).ready(function() {$.ajax({
-      url: "http://build.zynx.com:8080/api/json",
-      context: document.body,
-      jsonp: true,
-      success: function(response){
-        displayJobs($.parseJSON(response));
-      },
-      failure: function(response) {
-        alert(response);
-      }
-    });
-    });
-    function displayJobs(data) {
-      var source = $("#jobs-template").html();
-      var template = Handlebars.compile(source);
-      var html = template(data);
-      
-      $("div.builds").html(html);
-    }
+
+		$(document).ready(function() {
+			var url = "http://build.expenselynx.com:8080/api/json";
+			$.getJSON(url + "?jsonp=?", function(response) {
+				displayJobs(response);
+			});
+		});
+		
+		function displayJobs(data) {
+			var source = $("#jobs-template").html();
+			var template = Handlebars.compile(source);
+			var html = template(data);
+
+			$("div.builds").html(html);
+		}
+
     </script>
       <div class="builds"></div>
   </body>
