@@ -1,83 +1,96 @@
-<!doctype html>
+<!DOCTYPE HTML>
 <html>
-<head>
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
-  <script type="text/javascript" src="http://cloud.github.com/downloads/wycats/handlebars.js/handlebars-0.9.0.pre.5.js"></script>
-  <script id="jobs-template" type="text/x-handlebars-template">
-	<ol class="jobs">
-	  {{#each jobs}}
-	  <li><a href="{{url}}api/json" class="{{color}}" onclick="javascript:showBuild(this); return false;">{{name}}</a></li>
-	  {{/each}}
-	</ol>
-	</script>
+	<head>
+	  <script type="text/javascript" src="js/jquery/1.5.2/jquery.min.js"></script>
+	  <script type="text/javascript" src="js/handlebars/0.9.0.pre/handlebars.js"></script>
 	
-	<script id="builds-template" type="text/x-handlebars-template">
-	<ol class="builds">
-	  {{#each builds}}
-	  <li>Build Number: {{number}} <a href="{{url}}api/json" onclick="javascript:showBuildDetails(this); return false;">details</a></li>
-	  {{/each}}
-	</ol>
-	</script>
-	
-	<script id="build-details-template" type="text/x-handlebars-template">
-	<div class="builds-details">
-	  Build Number: {{number}}<br/>
-		Build Name: {{fullDisplayName}}<br/>
-		Result: {{result}}<br/>
-	</div>
-	</script>
-	
-  </head>
-  <body>
-    <script type="text/javascript">
-
-		$(document).ready(function() {
-			getJSONP("http://build.expenselynx.com:8080/api/json", displayJobs);
-		});
+	  <script id="jobs-template" type="text/x-handlebars-template">
+			<ol class="jobs">
+				{{#each jobs}}
+					<li><a href="{{url}}api/json" class="{{color}}" onclick="javascript:renderer.builds.get(this.href); return false;">{{name}}</a></li>
+				{{/each}}
+			</ol>
+		</script>
 		
-		function getJSONP(url, callback) {
-			$.getJSON(url + "?jsonp=?", function(response) {
-				callback(response);
+		<script id="builds-template" type="text/x-handlebars-template">
+			<ol class="builds">
+				{{#each builds}}
+					<li>Build Number: {{number}} <a href="{{url}}api/json" onclick="javascript:renderer.build_details.get(this.href); return false;">details</a></li>
+				{{/each}}
+			</ol>
+		</script>
+		
+		<script id="build-details-template" type="text/x-handlebars-template">
+			<div class="builds-details">
+			  Build Number: {{number}}<br/>
+				Build Name: {{fullDisplayName}}<br/>
+				Result: {{result}}<br/>
+			</div>
+		</script>	
+	</head>
+	<body>
+		<script type="text/javascript">
+		
+			$(document).ready(function() {
+				renderer = new BM.Renderers();
+				renderer.jobs.get("http://build.expenselynx.com:8080/api/json");
 			});
-		}
-		
-		function showBuild(anchor) {
-			getJSONP(anchor.href, displayBuild);
-		}
-		
-		function showBuildDetails(anchor) {
-			getJSONP(anchor.href, displayBuildDetails);
-		}
-		
-		function displayJobs(data) {
-			var source = $("#jobs-template").html();
-			var template = Handlebars.compile(source);
-			var html = template(data);
-
-			$("div.jobs").html(html);
-		}
-		
-		function displayBuild(data) {
-			var source = $("#builds-template").html();
-			var template = Handlebars.compile(source);
-			var html = template(data);
 			
-			$("div.builds").html(html);
-		}
-		
-		function displayBuildDetails(data) {
-			var source = $("#build-details-template").html();
-			var template = Handlebars.compile(source);
-			var html = template(data);
+			var BM = BM || {};
 			
-			$("div.builds-details").html(html);
-		}
-
-    </script>
-			<div class="jobs"></div>
-			<div class="builds"></div>
-			<div class="builds-details"></div>
-  </body>
+			BM.Utils = function (options) {
+				return {
+					getJSONP : function(url, callback) {
+						$.getJSON(url + "?jsonp=?", function(response) {
+							callback(response);
+						});
+					}
+			  };
+			};
+			
+			BM.JenkinsItemRenderer = function (options) {
+				var template_id = options.template_id;
+				var placeholder_id = options.placeholder_id;
+				var utils = new BM.Utils();
+				
+			  return {
+					get : function(url) {
+						console.debug('BM.JenkinsItemRenderer get url:' + url);
+						utils.getJSONP(url, this.load);
+					},
+					load : function(data) {
+						console.debug('BM.JenkinsItemRenderer load data:' + data);
+						console.debug(data);
+						var source = $(template_id).html();
+						var template = Handlebars.compile(source);
+						var html = template(data);
+						
+						$(placeholder_id).html(html);
+					}
+			  };
+			};
+			
+			BM.Renderers = function () {
+				return {
+					jobs : new BM.JenkinsItemRenderer({
+						template_id:"#jobs-template",
+						placeholder_id:"div.jobs"
+					}),
+					builds : new BM.JenkinsItemRenderer({
+						template_id:"#builds-template",
+						placeholder_id:"div.builds"
+					}),
+					build_details : new BM.JenkinsItemRenderer({
+						template_id:"#build-details-template",
+						placeholder_id:"div.build-details"
+					})
+			  };
+			};
+		</script>
+		<div class="jobs"></div>
+		<div class="builds"></div>
+		<div class="build-details"></div>
+	</body>
 </html>
 
 <!-- {
