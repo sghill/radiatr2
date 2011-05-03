@@ -1,5 +1,13 @@
 var BM = BM || {};
 
+BM.Utils = {
+	getJSONP : function(url, callback) {
+		$.getJSON(url + 'api/json' + "?jsonp=?", function(response) {
+			callback(response);
+		});
+	}
+};
+
 BM.JenkinsItemRenderer = function (options) {
 	var template_id = options.template_id;
 	var placeholder_id = options.placeholder_id;
