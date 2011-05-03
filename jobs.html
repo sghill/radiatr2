@@ -2,43 +2,80 @@
 <html>
 	<head>
 		<script type="text/javascript" src="js/jquery/1.5.2/jquery.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="css/site.css"></link>
 	</head>
 	<body>
-		<div class="jobs"></div>
-		<div class="builds"></div>
-		<div class="build-details"></div>
+		<div class="container">
+			<div class="jobs"></div>
+			<div class="builds"></div>
+			<div class="build-details"></div>
+		</div>
 		
 		<script type="text/javascript">
 			var renderer = null; //global renderer
+			// TODO:
+			// Date formatting (ISO 8601 I think)
+			// Duration formatting
+			// Expected build duration
 			
 			$(document).ready(function() {
 				renderer = new BM.Renderer(); //todo: pass options?
-				renderer.jobs.get("http://build.expenselynx.com:8080/api/json");
+				renderer.jobs.get("http://build.expenselynx.com:8080/");
+				
+				Handlebars.registerHelper('show_short_description', function() {
+					if (this.causes && this.causes.length > 0) {
+						return this.causes[0].shortDescription;
+					}
+					return "";
+				});
 			});
 		</script>
 		
 		<script id="jobs-template" type="text/x-handlebars-template">
 			<ol class="jobs">
 				{{#each jobs}}
-					<li><a href="{{url}}api/json" class="{{color}}" onclick="javascript:renderer.builds.get(this.href); return false;">{{name}}</a></li>
+					<li><a href="{{url}}" class="{{color}}" onclick="javascript:renderer.builds.get(this.href); return false;">{{name}}</a></li>
 				{{/each}}
 			</ol>
 		</script>
 		
 		<script id="builds-template" type="text/x-handlebars-template">
-			<ol class="builds">
-				{{#each builds}}
-					<li>Build Number: {{number}} <a href="{{url}}api/json" onclick="javascript:renderer.build_details.get(this.href); return false;">details</a></li>
+			<div class="build-summary {{color}}">
+				{{name}}
+				<img src="http://build.expenselynx.com:8080/static/a31e49a6/images/32x32/{{color}}.png" alt="last build history" />
+				{{#each healthReport}}
+					<img src="http://build.expenselynx.com:8080/static/a31e49a6/images/32x32/{{iconUrl}}" alt="{{description}}"/>
 				{{/each}}
-			</ol>
+			</div>
+			
+			<div class="build-last-successful">
+				{{#if lastSuccessfulBuild}}
+					<a href="{{lastSuccessfulBuild/url}}" onclick="javascript:renderer.build_details.get(this.href); return false;">Last Successful Build</a>
+				{{/if}}
+			</div>
+			
+			<div class="build-list">
+				Build List
+				{{#each builds}}
+					<a href="{{url}}" onclick="javascript:renderer.build_details.get(this.href); return false;">{{number}}</a>
+				{{/each}}
+			</div>
 		</script>
 		
 		<script id="build-details-template" type="text/x-handlebars-template">
-			<div class="builds-details">
-			  Build Number: {{number}}<br/>
-				Build Name: {{fullDisplayName}}<br/>
-				Result: {{result}}<br/>
-			</div>
+			Build Name: {{fullDisplayName}}<br/>
+			Build Number: {{number}}<br/>
+			Build Duration: {{duration}}<br/>
+			Result: {{result}}<br/>
+			{{#each actions}}
+				{{show_short_description}}
+			{{/each}}
+			{{#each changeSet/items}}
+				<div>
+					<h3>{{date}}</h3>
+					<strong>{{author.fullName}}</strong> - {{comment}}
+				</div>
+			{{/each}}
 		</script>
 		
 		<script type="text/javascript" src="js/handlebars/0.9.0.pre/handlebars.js"></script>
@@ -47,65 +84,3 @@
 		<script type="text/javascript" src="js/bm/renderer.js"></script>
 	</body>
 </html>
-
-<!-- {
-    "actions": [{
-        "causes": [{
-            "shortDescription": "Started by an SCM change"
-        }]
-    }, {}, {
-        "buildsByBranchName": {
-            "origin/master": {
-                "buildNumber": 8,
-                "buildResult": null,
-                "revision": {
-                    "SHA1": "76f905ad461c2c555a29710c1f6c493259b5b7f3",
-                    "branch": [{
-                        "SHA1": "76f905ad461c2c555a29710c1f6c493259b5b7f3",
-                        "name": "origin/master"
-                    }]
-                }
-            }
-        },
-        "lastBuiltRevision": {
-            "SHA1": "76f905ad461c2c555a29710c1f6c493259b5b7f3",
-            "branch": [{
-                "SHA1": "76f905ad461c2c555a29710c1f6c493259b5b7f3",
-                "name": "origin/master"
-            }]
-        }
-    }, {}],
-    "artifacts": [],
-    "building": false,
-    "description": null,
-    "duration": 7513,
-    "fullDisplayName": "akiellor - objectify #8",
-    "id": "2011-03-14_03-39-36",
-    "keepLog": false,
-    "number": 8,
-    "result": "SUCCESS",
-    "timestamp": 1300073976000,
-    "url": "http://build.expenselynx.com:8080/job/akiellor%20-%20objectify/8/",
-    "builtOn": "",
-    "changeSet": {
-        "items": [{
-            "author": {
-                "absoluteUrl": "http://build.expenselynx.com:8080/user/Andrew%20Kiellor",
-                "fullName": "Andrew Kiellor"
-            },
-            "comment": "Bumped version to 0.0.3\n",
-            "date": "2011-03-14 03:38:18 +1100",
-            "id": "76f905ad461c2c555a29710c1f6c493259b5b7f3",
-            "msg": "Bumped version to 0.0.3",
-            "paths": [{
-                "editType": "edit",
-                "file": "lib/objectify/version.rb"
-            }]
-        }],
-        "kind": null
-    },
-    "culprits": [{
-        "absoluteUrl": "http://build.expenselynx.com:8080/user/Andrew%20Kiellor",
-        "fullName": "Andrew Kiellor"
-    }]
-} -->

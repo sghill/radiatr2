@@ -1,0 +1,49 @@
+html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, ol, ul, li, form, label {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+body {
+	font: 16px verdana, helvetica, sans-serif;
+}
+a {
+	color: #306d8d;
+}
+a:hover {
+	color: #014b72;
+}
+h1 {
+	color: #fff;
+	font-size: 20px;
+	font-weight: normal;
+	padding: 11px 0px 0px 0px;
+}
+ol, ul {
+	list-style: none;
+}
+.clear{
+	clear: both;
+}
+
+div.container {
+	padding: 50px;
+}
+div.jobs {
+}
+div.builds {
+}
+div.build-summary {
+	padding-bottom: 10px;
+}
+span.green {
+	color: green;
+}
+span.blue {
+	color: blue;
+}
+span.red {
+	color: red;
+}
+div.build-details {
+	padding-top: 10px;
+}
